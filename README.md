@@ -12,12 +12,12 @@ sudo apt update && sudo apt install -y lm-sensors
 ### **2️⃣ Download and Install myrktop**
 Run the following command to download and install the script:
 ```bash
-wget -O /usr/local/bin/myrktop.sh https://raw.githubusercontent.com/mhl221135/myrktop/main/myrktop.sh
+wget -O ~/myrktop.sh https://raw.githubusercontent.com/mhl221135/myrktop/main/myrktop.sh
 wget -O /usr/local/bin/myrktop https://raw.githubusercontent.com/mhl221135/myrktop/main/myrktop
 ```
 Then, make the script executable:
 ```bash
-sudo chmod +x /usr/local/bin/myrktop.sh
+sudo chmod +x ~/myrktop.sh
 sudo chmod +x /usr/local/bin/myrktop
 ```
 
