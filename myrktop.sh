@@ -55,7 +55,7 @@ echo "🎮 GPU Load: ${gpu_load}%"
 echo "🎮 GPU Frequency: $((gpu_freq / 1000000)) MHz"
 
 # 🧠 NPU Load & Frequency (Fixed Formatting)
-npu_load=$(cat /sys/kernel/debug/rknpu/load 2>/dev/null | sed -E 's/NPU load: //; s/Core[0-2]: //g; s/  +>
+npu_load=$(cat /sys/kernel/debug/rknpu/load 2>/dev/null | sed -E 's/NPU load: //; s/Core[0-2]: //g; s/  +/ /g; s/,//g;' | xargs || echo "N/A")
 npu_freq=$(cat /sys/class/devfreq/fdab0000.npu/cur_freq 2>/dev/null || echo "N/A")
 echo "🧠 NPU Load: ${npu_load}"
 echo "🧠 NPU Frequency: $((npu_freq / 1000000)) MHz"
@@ -74,7 +74,7 @@ free -h | awk "/Swap:/ {print \"Swap Used: \" \$3 \" / \" \$2}"
 echo "--------------------------------------"
 # 🌡️ Temperatures
 echo "🌡️  Temperatures:"
-sensors | awk "
+sensors | awk '
 /thermal|nvme|gpu/ {name=$1}
 /temp1|Composite/ {print name ": " $2}
-"
+'
