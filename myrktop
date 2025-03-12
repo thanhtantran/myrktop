@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Run monitoring script in the background
-watch -n0.5 ./usr/local/bin/myrktop.sh
+watch -n0.5 /usr/local/bin/myrktop.sh
