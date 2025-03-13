@@ -52,7 +52,7 @@ for ((i=0; i<core_count; i++)); do
     prev_idle[$i]=$idle
 done
 
-sleep 1
+#sleep 1
 
 # Capture new stats for each core
 for ((i=0; i<core_count; i++)); do
