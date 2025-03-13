@@ -16,12 +16,27 @@ echo -e "${BLUE}$LINE${RESET}"
 echo -e " 🔥 ${YELLOW}Orange Pi 5 - System Monitor${RESET}"
 echo -e "${BLUE}$LINE${RESET}"
 
+
+
 # 🌍 Device Info
 device_info=$(cat /sys/firmware/devicetree/base/compatible 2>/dev/null | tr -d '\0' || echo "N/A")
 npu_version=$(cat /sys/kernel/debug/rknpu/version 2>/dev/null || echo "N/A")
+system_uptime=$(uptime -p)  # Get system uptime
+docker_status=$(systemctl is-active docker)  # Get Docker status
+
 printf " ${CYAN}Device:${RESET} ${BOLD}%s${RESET}\n" "$device_info"
 printf " ${CYAN}Version:${RESET} ${BOLD}%s${RESET}\n" "$npu_version"
+printf " ${CYAN}System Uptime:${RESET} ${BOLD}%s${RESET}\n" "$system_uptime"
+
+# 🐳 Docker Service Status
+if [ "$docker_status" == "active" ]; then
+    printf " ${CYAN}Docker Status:${RESET} ${GREEN}${BOLD}Running ✅${RESET}\n"
+else
+    printf " ${CYAN}Docker Status:${RESET} ${RED}${BOLD}Not Running ❌${RESET}\n"
+fi
+
 echo -e "${BLUE}$LINE${RESET}"
+
 
 # 📊 CPU Usage & Frequency
 echo -e " ${YELLOW}📊 CPU Usage & Frequency${RESET}"
@@ -75,9 +90,21 @@ printf " ${YELLOW}🧠 NPU Load:${RESET} ${GREEN}${BOLD}%-10s${RESET}  %4d MHz${
 echo -e "${BLUE}$LINE${RESET}"
 
 # 🖼️ RGA Load (Always Green)
-rga_load=$(cat /sys/kernel/debug/rkrga/load 2>/dev/null | grep -oP '\d+%' | tr '\n' ' ' || echo "0% 0% 0%")
-printf " ${YELLOW}🖼️  RGA Load:${RESET} ${GREEN}${BOLD}%-10s${RESET}\n" "$rga_load"
+#rga_load=$(cat /sys/kernel/debug/rkrga/load 2>/dev/null | grep -oP '\d+%' | tr '\n' ' ' || echo "0% 0% 0%")
+#printf " ${YELLOW}🖼️  RGA Load:${RESET} ${GREEN}${BOLD}%-10s${RESET}\n" "$rga_load"
+#echo -e "${BLUE}$LINE${RESET}"
+
+
+# 🖼️ RGA Load (Always Green for Stability)
+rga_load=$(cat /sys/kernel/debug/rkrga/load 2>/dev/null || echo "N/A")
+rga_values=$(echo "$rga_load" | grep -oP 'load = \K[0-9]+%' | head -n 3 | tr '\n' ' ')
+
+# Ensure output is never empty
+rga_values=${rga_values:-"0% 0% 0%"}
+
+printf " ${YELLOW}🖼️  RGA Load:${RESET} ${GREEN}${BOLD}%-12s${RESET}\n" "$rga_values"
 echo -e "${BLUE}$LINE${RESET}"
+
 
 # 🌡️ Temperatures (Fixed)
 echo -e " ${YELLOW}🌡️ Temperatures${RESET}"
@@ -108,4 +135,91 @@ TX_RATE=$(echo "scale=2; ($TX2 - $TX1) / 125000" | bc)
 
 printf " ${YELLOW}🔌 Network Traffic (eth0)${RESET}\n"
 printf " ${CYAN}Download:${RESET} ${GREEN}${BOLD}%-5s Mbps${RESET} | ${CYAN}Upload:${RESET} ${GREEN}${BOLD}%-5s Mbps${RESET}\n" "$RX_RATE" "$TX_RATE"
+echo -e "${BLUE}$LINE${RESET}"
+
+#🔌 2. Connected USB Devices (Only Active Devices)
+echo -e " ${YELLOW}🔌 Connected USB Devices${RESET}"
+lsusb | awk -F 'ID ' '{if ($2 !~ /Linux Foundation/) print "• "$2}'
+echo -e "${BLUE}$LINE${RESET}"
+
+
+
+echo -e " ${YELLOW}💾 NVMe & USB Storage Info${RESET}"
+
+# Get a list of NVMe devices
+nvme_devices=$(lsblk -dno NAME,TYPE | awk '$2=="disk" && $1 ~ /^nvme/ {print $1}')
+
+# Display NVMe Information
+if [[ -n "$nvme_devices" ]]; then
+    echo -e " ${CYAN}📦 NVMe Devices Found:${RESET}"
+    for nvme in $nvme_devices; do
+        model=$(nvme id-ctrl /dev/$nvme | grep "Model Number" | awk -F ":" '{print $2}' | xargs)
+        health=$(nvme smart-log /dev/$nvme | grep "percentage_used" | awk '{print $3}' | tr -d '%')  # Remove %
+        temp=$(nvme smart-log /dev/$nvme | grep "temperature" | awk '{print $3}')
+        power_hours=$(nvme smart-log /dev/$nvme | grep "power_on_hours" | awk '{print $3}')
+        trim_support=$(nvme id-ctrl /dev/$nvme | grep "Volatile Write Cache" | awk -F ":" '{print $2}' | xargs)
+
+        # Handle missing values
+        health=${health:-0}  # Default to 0 if empty
+        temp=${temp:-"N/A"}
+        power_hours=${power_hours:-"N/A"}
+        trim_support=${trim_support:-"Unknown"}
+
+        # Determine Health Status
+        if [[ "$health" -ge 80 ]]; then
+            health_status="${RED}BAD${RESET}"
+        elif [[ "$health" -ge 50 ]]; then
+            health_status="${YELLOW}WARNING${RESET}"
+        else
+            health_status="${GREEN}GOOD${RESET}"
+        fi
+
+        printf " ${BOLD}Device: ${RESET}/dev/$nvme - ${GREEN}%s${RESET}\n" "${model:-Unknown}"
+        printf "  ├── Health Used: ${BOLD}%s%%%s (%s)\n" "$health" "$RESET" "$health_status"
+        printf "  ├── Temperature: ${BOLD}%s°C${RESET}\n" "$temp"
+        printf "  ├── Power-On Hours: ${BOLD}%s hrs${RESET}\n" "$power_hours"
+        printf "  ├── TRIM Support: ${BOLD}%s${RESET}\n" "$trim_support"
+    done
+else
+    echo -e " ${RED}No NVMe devices detected.${RESET}"
+fi
+
+# Get a list of USB storage devices
+usb_devices=$(lsblk -dno NAME,TRAN | awk '$2=="usb" {print $1}')
+
+# Display USB Storage Information
+if [[ -n "$usb_devices" ]]; then
+    echo -e " ${CYAN}🔌 USB Storage Devices Found:${RESET}"
+    for usb in $usb_devices; do
+        model=$(lsblk -dno MODEL /dev/$usb | xargs)
+        health=$(smartctl -H /dev/$usb | grep "SMART overall-health self-assessment test result" | awk -F ":" '{print $2}' | xargs)
+        temp=$(smartctl -A /dev/$usb | grep "Temperature_Celsius" | awk '{print $10}')
+        power_hours=$(smartctl -A /dev/$usb | grep "Power_On_Hours" | awk '{print $10}')
+        trim_support=$(lsblk -D /dev/$usb | awk 'NR==2 {print ($2=="1"?"Yes":"No")}')
+
+        # Handle missing values
+        health=${health:-"Unknown"}
+        temp=${temp:-"N/A"}
+        power_hours=${power_hours:-"N/A"}
+        trim_support=${trim_support:-"Unknown"}
+
+        # Determine Health Status
+        if [[ "$health" == "PASSED" ]]; then
+            health_status="${GREEN}GOOD${RESET}"
+        elif [[ "$health" == "FAILED" ]]; then
+            health_status="${RED}BAD${RESET}"
+        else
+            health_status="${YELLOW}UNKNOWN${RESET}"
+        fi
+
+        printf " ${BOLD}Device: ${RESET}/dev/$usb - ${GREEN}%s${RESET}\n" "${model:-Unknown}"
+        printf "  ├── SMART Health: ${BOLD}%s${RESET} (%s)\n" "$health" "$health_status"
+        printf "  ├── Temperature: ${BOLD}%s°C${RESET}\n" "$temp"
+        printf "  ├── Power-On Hours: ${BOLD}%s hrs${RESET}\n" "$power_hours"
+        printf "  ├── TRIM Support: ${BOLD}%s${RESET}\n" "$trim_support"
+    done
+else
+    echo -e " ${RED}No USB storage devices detected.${RESET}"
+fi
+
 echo -e "${BLUE}$LINE${RESET}"
