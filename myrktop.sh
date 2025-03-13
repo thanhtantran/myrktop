@@ -95,22 +95,28 @@ npu_freq=$(cat /sys/class/devfreq/fdab0000.npu/cur_freq 2>/dev/null || echo "N/A
 printf " ${YELLOW}🧠 NPU Load:${RESET} ${GREEN}${BOLD}%-10s${RESET}  %4d MHz${RESET}\n" "$npu_load" "$((npu_freq / 1000000))"
 echo -e "${BLUE}$LINE${RESET}"
 
-# 🖼️ RGA Load (Always Green)
-#rga_load=$(cat /sys/kernel/debug/rkrga/load 2>/dev/null | grep -oP '\d+%' | tr '\n' ' ' || echo "0% 0% 0%")
-#printf " ${YELLOW}🖼️  RGA Load:${RESET} ${GREEN}${BOLD}%-10s${RESET}\n" "$rga_load"
-#echo -e "${BLUE}$LINE${RESET}"
-
 
 # 🖼️ RGA Load (Always Green for Stability)
 rga_load=$(cat /sys/kernel/debug/rkrga/load 2>/dev/null || echo "N/A")
 rga_values=$(echo "$rga_load" | grep -oP 'load = \K[0-9]+%' | head -n 3 | tr '\n' ' ')
-
 # Ensure output is never empty
 rga_values=${rga_values:-"0% 0% 0%"}
 
 printf " ${YELLOW}🖼️  RGA Load:${RESET} ${GREEN}${BOLD}%-12s${RESET}\n" "$rga_values"
 echo -e "${BLUE}$LINE${RESET}"
 
+# 🖥️ RAM & Swap Usage
+echo -e " ${YELLOW}🖥️  RAM & Swap Usage:${RESET}"
+ram_usage=$(free -h | awk '/Mem:/ {print $3}')
+ram_total=$(free -h | awk '/Mem:/ {print $2}')
+swap_usage=$(free -h | awk '/Swap:/ {print $3}')
+swap_total=$(free -h | awk '/Swap:/ {print $2}')
+
+printf " RAM Used:  ${BOLD}${GREEN}%-6s${RESET} / ${BOLD}%s${RESET}\n" "$ram_usage" "$ram_total"
+printf " Swap Used: ${BOLD}${GREEN}%-6s${RESET} / ${BOLD}%s${RESET}\n" "$swap_usage" "$swap_total"
+
+
+echo -e "${BLUE}$LINE${RESET}"
 
 # 🌡️ Temperatures (Fixed)
 echo -e " ${YELLOW}🌡️ Temperatures${RESET}"
