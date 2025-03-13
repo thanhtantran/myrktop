@@ -41,40 +41,46 @@ echo -e "${BLUE}$LINE${RESET}"
 # 📊 CPU Usage & Frequency
 echo -e " ${YELLOW}📊 CPU Usage & Frequency${RESET}"
 
-cpu_loads=()
-prev_total=()
-prev_idle=()
+declare -A prev_total prev_idle cpu_loads
+core_count=$(nproc)
 
-for i in {0..7}; do
-    read -r cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat
-    prev_total[i]=$((user + nice + system + idle + iowait + irq + softirq + steal))
-    prev_idle[i]=$idle
+# Capture initial CPU stats for **each core individually**
+for ((i=0; i<core_count; i++)); do
+    cpu_line=$(grep "cpu$i " /proc/stat)
+    read -r _ user nice system idle iowait irq softirq steal guest guest_nice <<< "$cpu_line"
+    prev_total[$i]=$((user + nice + system + idle + iowait + irq + softirq + steal))
+    prev_idle[$i]=$idle
 done
 
 sleep 1
 
-for i in {0..7}; do
-    read -r cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat
+# Capture new stats for each core
+for ((i=0; i<core_count; i++)); do
+    cpu_line=$(grep "cpu$i " /proc/stat)
+    read -r _ user nice system idle iowait irq softirq steal guest guest_nice <<< "$cpu_line"
     total=$((user + nice + system + idle + iowait + irq + softirq + steal))
-    diff_total=$((total - prev_total[i]))
-    diff_idle=$((idle - prev_idle[i]))
+    diff_total=$((total - prev_total[$i]))
+    diff_idle=$((idle - prev_idle[$i]))
+    
     if [ $diff_total -ne 0 ]; then
-        cpu_loads[i]=$((100 * (diff_total - diff_idle) / diff_total))
+        cpu_loads[$i]=$((100 * (diff_total - diff_idle) / diff_total))
     else
-        cpu_loads[i]=0
+        cpu_loads[$i]=0
     fi
+
+    prev_total[$i]=$total
+    prev_idle[$i]=$idle
 done
 
-total_load=$(awk "BEGIN {sum=0; for(i=0;i<8;i++) sum+=${cpu_loads[i]}; print sum/8}")
-printf " ${CYAN}Total CPU Load:${RESET} ${GREEN}${BOLD}%3d%%%s\n" "$total_load" "$RESET"
-
-for i in {0..3}; do
+# Display per-core CPU load & frequency (NO SHARED VALUES)
+for ((i=0; i<core_count/2; i++)); do
     freq1=$(cat /sys/devices/system/cpu/cpu$i/cpufreq/scaling_cur_freq 2>/dev/null || echo 0)
     freq2=$(cat /sys/devices/system/cpu/cpu$((i+4))/cpufreq/scaling_cur_freq 2>/dev/null || echo 0)
     printf " Core %d: ${GREEN}${BOLD}%3d%%%s  %4d MHz   Core %d: ${GREEN}${BOLD}%3d%%%s  %4d MHz\n" \
-        "$i" "${cpu_loads[i]}" "$RESET" "$((freq1 / 1000))" \
-        "$((i+4))" "${cpu_loads[i+4]}" "$RESET" "$((freq2 / 1000))"
+        "$i" "${cpu_loads[$i]}" "$RESET" "$((freq1 / 1000))" \
+        "$((i+4))" "${cpu_loads[$((i+4))]}" "$RESET" "$((freq2 / 1000))"
 done
+
 echo -e "${BLUE}$LINE${RESET}"
 
 # 🎮 GPU Load & Frequency (Always Green)
@@ -138,9 +144,9 @@ printf " ${CYAN}Download:${RESET} ${GREEN}${BOLD}%-5s Mbps${RESET} | ${CYAN}Uplo
 echo -e "${BLUE}$LINE${RESET}"
 
 #🔌 2. Connected USB Devices (Only Active Devices)
-echo -e " ${YELLOW}🔌 Connected USB Devices${RESET}"
-lsusb | awk -F 'ID ' '{if ($2 !~ /Linux Foundation/) print "• "$2}'
-echo -e "${BLUE}$LINE${RESET}"
+#echo -e " ${YELLOW}🔌 Connected USB Devices${RESET}"
+#lsusb | awk -F 'ID ' '{if ($2 !~ /Linux Foundation/) print "• "$2}'
+3echo -e "${BLUE}$LINE${RESET}"
 
 
 
