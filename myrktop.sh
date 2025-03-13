@@ -146,7 +146,7 @@ echo -e "${BLUE}$LINE${RESET}"
 #🔌 2. Connected USB Devices (Only Active Devices)
 #echo -e " ${YELLOW}🔌 Connected USB Devices${RESET}"
 #lsusb | awk -F 'ID ' '{if ($2 !~ /Linux Foundation/) print "• "$2}'
-3echo -e "${BLUE}$LINE${RESET}"
+#echo -e "${BLUE}$LINE${RESET}"
 
 
 
