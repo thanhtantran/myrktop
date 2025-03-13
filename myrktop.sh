@@ -92,8 +92,10 @@ echo -e "${BLUE}$LINE${RESET}"
 
 # 📊 Disk Usage
 echo -e " ${YELLOW}📊 Disk Usage${RESET}"
+echo -e " ${CYAN}Mount Point         Total   Used    Free${RESET}"
 df -h | awk '$6=="/" || $6=="/media/wdmount" || $6=="/media/ssdmount" {printf " %-18s %-7s %-7s %-7s\n", $6, $2, $3, $4}'
 echo -e "${BLUE}$LINE${RESET}"
+
 
 # 🔌 Network Traffic (eth0) - Now Stable
 RX1=$(cat /proc/net/dev | awk '/eth0:/ {print $2}')
