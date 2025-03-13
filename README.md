@@ -1,4 +1,4 @@
-# 🖥️ myrktop - Orange Pi 5 (RK3588) System Monitor
+# 🖥️ myrktop - Orange Pi 5 (RK3588) System Monitor COLORED BRANCH
 
 🔥 **myrktop** is a lightweight system monitor for **Orange Pi 5 (RK3588)**, providing real-time information about **CPU, GPU, NPU, RAM, RGA, and system temperatures**.
 
@@ -12,8 +12,8 @@ sudo apt update && sudo apt install -y lm-sensors
 ### **2️⃣ Download and Install myrktop**
 Run the following command to download and install the script:
 ```bash
-wget -O ~/myrktop.sh https://raw.githubusercontent.com/mhl221135/myrktop/main/myrktop.sh
-wget -O /usr/local/bin/myrktop https://raw.githubusercontent.com/mhl221135/myrktop/main/myrktop
+wget -O ~/myrktop.sh https://raw.githubusercontent.com/mhl221135/myrktop/colored/myrktop.sh
+wget -O /usr/local/bin/myrktop https://raw.githubusercontent.com/mhl221135/colored/main/myrktop
 ```
 Then, make the script executable:
 ```bash
@@ -41,42 +41,45 @@ myrktop
 
 ## **📌 Example Output**
 ```bash
-Every 0.5s: /usr/local/bin/myrktop                                        orangepi5: Wed Mar 12 13:28:15 2025
+Every 0.5s: /root/myrktop.sh                                                                                                                      orangepi5: Thu Mar 13 11:30:16 2025
 
-🔥 Orange Pi 5 - System Monitor 🔥
-Device: rockchip,rk3588s-orangepi-5rockchip,rk3588
-Version: RKNPU driver: v0.9.8
---------------------------------------
-📊 CPU Usage & Frequency:
-Total CPU Load: 4%
-Core 0: 4% 1800 MHz
-Core 1: 4% 1800 MHz
-Core 2: 4% 1800 MHz
-Core 3: 4% 1800 MHz
-Core 4: 4% 600 MHz
-Core 5: 4% 600 MHz
-Core 6: 4% 600 MHz
-Core 7: 4% 600 MHz
---------------------------------------
-🎮 GPU Load: 0%
-🎮 GPU Frequency: 300 MHz
-🧠 NPU Load: 0% 0% 0%
-🧠 NPU Frequency: 1000 MHz
-🖼️  RGA Load: 0% 0% 0%
---------------------------------------
-🖥️  RAM & Swap Usage:
-RAM Used: 1.8Gi / 15Gi
-Swap Used: 16Mi / 7.8Gi
---------------------------------------
-🌡️  Temperatures:
-npu_thermal-virtual-0: +33.3°C
-center_thermal-virtual-0: +32.4°C
-bigcore1_thermal-virtual-0: +34.2°C
-soc_thermal-virtual-0: +34.2°C
-nvme-pci-44100: +31.9°C
-gpu_thermal-virtual-0: +32.4°C
-littlecore_thermal-virtual-0: +33.3°C
-bigcore0_thermal-virtual-0: +33.3°C
+───────────────────────────────────────────────────────────
+ 🔥 Orange Pi 5 - System Monitor
+───────────────────────────────────────────────────────────
+ Device: rockchip,rk3588s-orangepi-5rockchip,rk3588
+ Version: RKNPU driver: v0.9.8
+───────────────────────────────────────────────────────────
+ 📊 CPU Usage & Frequency
+ Total CPU Load:   2%
+ Core 0:   1%  1800 MHz   Core 4:   1%  2352 MHz
+ Core 1:   1%  1800 MHz   Core 5:   1%  2352 MHz
+ Core 2:   1%  1800 MHz   Core 6:   1%   408 MHz
+ Core 3:   1%  1800 MHz   Core 7:   2%   408 MHz
+───────────────────────────────────────────────────────────
+ 🎮 GPU Load:   0%   300 MHz
+───────────────────────────────────────────────────────────
+ 🧠 NPU Load: 0% 0% 0%    1000 MHz
+───────────────────────────────────────────────────────────
+ 🖼️  RGA Load: 0% 0% 0%  
+───────────────────────────────────────────────────────────
+ 🌡️ Temperatures
+ npu_thermal-virtual-0          36°C
+ center_thermal-virtual-0       35°C
+ bigcore1_thermal-virtual-0     36°C
+ soc_thermal-virtual-0          36°C
+ nvme-pci-44100                 34°C
+ gpu_thermal-virtual-0          35°C
+ littlecore_thermal-virtual-0   36°C
+ bigcore0_thermal-virtual-0     36°C
+───────────────────────────────────────────────────────────
+ 📊 Disk Usage
+ /                  59G     5.2G    53G
+ /media/ssdmount    938G    305G    586G
+ /media/wdmount     1.8T    356G    1.4T
+───────────────────────────────────────────────────────────
+ 🔌 Network Traffic (eth0)
+ Download: 0     Mbps | Upload: .02   Mbps
+───────────────────────────────────────────────────────────
 ```
 
 ---
