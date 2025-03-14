@@ -79,20 +79,34 @@ def get_cpu_info():
         cpu_freqs[i] = freq
     return cpu_loads, cpu_freqs
 
+
+
 def get_gpu_info():
     try:
         with open("/sys/class/devfreq/fb000000.gpu/load", "r") as f:
-            gpu_load_str = f.read().strip()
-        gpu_load = int(gpu_load_str.split()[0])
+            raw_line = f.read().strip()  # e.g., "0@300000000Hz"
+        # Split using '@' or space (same as -F'[@ ]' in AWK)
+        fields = re.split(r'[@ ]+', raw_line)
+        # The first field is the GPU load (as a number)
+        load_str = fields[0]
+        # If there's a trailing '%' remove it (not needed for your case)
+        if load_str.endswith('%'):
+            load_str = load_str[:-1]
+        gpu_load = int(load_str)
     except Exception:
         gpu_load = 0
+
     try:
         with open("/sys/class/devfreq/fb000000.gpu/cur_freq", "r") as f:
             gpu_freq_str = f.read().strip()
-        gpu_freq = int(gpu_freq_str) // 1000000  # Hz to MHz
+        # Convert Hz to MHz
+        gpu_freq = int(gpu_freq_str) // 1000000
     except Exception:
         gpu_freq = 0
+
     return gpu_load, gpu_freq
+
+
 
 def get_npu_info():
     try:
