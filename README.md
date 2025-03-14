@@ -13,7 +13,7 @@ sudo apt update && sudo apt install -y python3 python3-pip lm-sensors smartmonto
 Run the following command to download and install the script:
 ```bash
 wget -O ~/myrktop.sh https://raw.githubusercontent.com/mhl221135/myrktop/py-colored/myrktop.py
-wget -O /usr/local/bin/myrktop https://raw.githubusercontent.com/mhl221135/py-colored/main/myrktop
+wget -O /usr/local/bin/myrktop https://raw.githubusercontent.com/mhl221135/py-colored/myrktop
 ```
 Then, make the script executable:
 ```bash
