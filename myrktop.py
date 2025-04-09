@@ -212,28 +212,63 @@ def get_temperatures():
     return temp_items
 
 def get_network_traffic():
-    global prev_rx, prev_tx, prev_net_time
+    global prev_stats, prev_net_time
+    
+    # Khởi tạo cấu trúc lưu trữ
+    current_stats = {}
     try:
         with open("/proc/net/dev", "r") as f:
             lines = f.readlines()
-        eth0_line = next((l for l in lines if "eth0:" in l), None)
-        if eth0_line:
-            parts = eth0_line.split()
-            rx = int(parts[1])
-            tx = int(parts[9])
-        else:
-            rx = tx = 0
+        
+        # Tìm tất cả interface eth0 và enP*
+        interfaces = []
+        for line in lines:
+            if ":" in line:
+                ifname = line.split(":")[0].strip()
+                if ifname == "eth0" or ifname.startswith("enP"):
+                    interfaces.append(ifname)
+        
+        # Lấy thông số cho từng interface
+        for ifname in interfaces:
+            line = next((l for l in lines if f"{ifname}:" in l), None)
+            if line:
+                parts = line.split()
+                rx = int(parts[1])
+                tx = int(parts[9])
+                current_stats[ifname] = {'rx': rx, 'tx': tx}
+                
     except Exception:
-        rx = tx = 0
+        pass  # Xử lý lỗi nếu cần
+    
     current_time = time.time()
+    
+    # Khởi tạo kết quả trả về
+    results = {}
+    
     if prev_net_time is None:
-        prev_rx, prev_tx, prev_net_time = rx, tx, current_time
-        return 0.0, 0.0
-    dt = current_time - prev_net_time
-    rx_rate = (rx - prev_rx) * 8 / (1e6 * dt)
-    tx_rate = (tx - prev_tx) * 8 / (1e6 * dt)
-    prev_rx, prev_tx, prev_net_time = rx, tx, current_time
-    return rx_rate, tx_rate
+        # Lần đầu chạy, chỉ lưu giá trị hiện tại
+        prev_stats = current_stats
+        prev_net_time = current_time
+        for ifname in current_stats:
+            results[ifname] = (0.0, 0.0)  # Down 0, Up 0
+    else:
+        # Tính toán tốc độ
+        dt = current_time - prev_net_time
+        if dt > 0:
+            # Tính cho các interface hiện có
+            for ifname in current_stats:
+                if ifname in prev_stats:
+                    rx_rate = (current_stats[ifname]['rx'] - prev_stats[ifname]['rx']) * 8 / (1e6 * dt)
+                    tx_rate = (current_stats[ifname]['tx'] - prev_stats[ifname]['tx']) * 8 / (1e6 * dt)
+                else:
+                    rx_rate = tx_rate = 0.0
+                results[ifname] = (rx_rate, tx_rate)
+            
+            # Cập nhật giá trị cũ
+            prev_stats = current_stats
+            prev_net_time = current_time
+    
+    return results
 
 def get_fstab_disk_usage():
     mountpoints = []
@@ -498,8 +533,9 @@ def build_dashboard():
     lines.append(("header", sep))
 
     # Network Traffic
-    rx_rate, tx_rate = get_network_traffic()
-    lines.append(("title", f"🌐 Net (eth0): Down {rx_rate:.2f} Mbps | Up {tx_rate:.2f} Mbps"))
+    net_stats = get_network_traffic()
+    for ifname, (rx_rate, tx_rate) in net_stats.items():
+        lines.append(("title", f"🌐 Net ({ifname}): Down {rx_rate:.2f} Mbps | Up {tx_rate:.2f} Mbps"))
     lines.append(("header", sep))
 
     # Disk Usage (from /etc/fstab)
