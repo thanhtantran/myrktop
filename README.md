@@ -1,29 +1,30 @@
-# 🖥️ myrktop - Orange Pi 5 (RK3588) System Monitor COLORED BRANCH
+# 🖥️ myrktop - Orange Pi 5/5 Plus (RK3588) System Monitor COLORED BRANCH
 
-🔥 **myrktop** is a lightweight system monitor for **Orange Pi 5 (RK3588)**, providing real-time information about **CPU, GPU, NPU, RAM, RGA, and system temperatures**.
+🔥 **myrktop** is a lightweight system monitor for **Orange Pi 5/5 Plus (RK3588)**, providing real-time information about **CPU, GPU, NPU, RAM, RGA, and system temperatures**.
 
 ## **📥 Installation Instructions**
 ### **1️⃣ Install Required Dependencies**
 Before running the script, install dependencies to fetch readings:
 ```bash
-sudo apt update && sudo apt install -y python3 python3-pip lm-sensors smartmontools nvme-cli && sudo sensors-detect --auto && pip3 install urwid
+sudo apt update && sudo apt install -y python3 python3-pip lm-sensors smartmontools nvme-cli
+sudo sensors-detect --auto
+sudo pip install urwid
 ```
 
 ### **2️⃣ Download and Install myrktop**
 Run the following command to download and install the script:
 ```bash
-wget -O ~/myrktop.py https://raw.githubusercontent.com/mhl221135/myrktop/refs/heads/py-colored/myrktop.py
-wget -O /usr/local/bin/myrktop https://raw.githubusercontent.com/mhl221135/myrktop/refs/heads/py-colored/myrktop
+git clone https://github.com/thanhtantran/myrktop
 ```
 Then, make the script executable:
 ```bash
-sudo chmod +x /usr/local/bin/myrktop
+sudo chmod +x myrktop/myrktop.py
 ```
 
 ### **3️⃣ Run the Monitoring Script**
 To run the script use:
 ```bash
-myrktop
+sudo python myrktop/myrktop.py
 ```
 
 ---
@@ -34,7 +35,7 @@ myrktop
 - **NPU & RGA usage**
 - **RAM & Swap usage**
 - **System temperature readings**
-- **Net (eth0): Down/Up readings**
+- **Network: Down/Up readings**
 - **Storage Usage (/etc/fstab)**
 - **NVMe & USB Storage Info:**
 
@@ -42,60 +43,10 @@ myrktop
 ---
 
 ## **📌 Example Output**
-```bash
-──────────────────────────────────────────────────
-🔥 System Monitor
-──────────────────────────────────────────────────
-Device: rockchip,rk3588s-orangepi-5rockchip,rk3588
-NPU Version: RKNPU driver: v0.9.8
-System Uptime: up 1 day, 1 hour, 31 minutes
-Docker Status: Running ✅
-──────────────────────────────────────────────────
-📊 CPU Usage & Frequency:
-Core 0:   8% 1800MHz   Core 1:   9% 1800MHz
-Core 2:   3% 1800MHz   Core 3:   5% 1800MHz
-Core 4:   7% 2352MHz   Core 5:  10% 2352MHz
-Core 6:  14% 2304MHz   Core 7:   7% 2304MHz
-──────────────────────────────────────────────────
-🎮 GPU Load:   0%    300 MHz
-──────────────────────────────────────────────────
-🧠 NPU Load: 0% 0% 0%   1000 MHz
-──────────────────────────────────────────────────
-🖼️  RGA Load: 0% 0% 0%
-──────────────────────────────────────────────────
-🖥️  RAM & Swap Usage:
-RAM Used: 2.9Gi / 15Gi
-Swap Used: 12Mi / 7.8Gi
-──────────────────────────────────────────────────
-🌡️  Temperatures:
-npu_thermal-virtual-0          33°C
-center_thermal-virtual-0       32°C
-bigcore1_thermal-virtual-0     33°C
-soc_thermal-virtual-0          33°C
-nvme-pci-44100                 30°C
-gpu_thermal-virtual-0          32°C
-littlecore_thermal-virtual-0   33°C
-bigcore0_thermal-virtual-0     33°C
-──────────────────────────────────────────────────
-🌐 Net (eth0): Down 0.01 Mbps | Up 0.05 Mbps
-──────────────────────────────────────────────────
-💾 Storage Usage (/etc/fstab):
-Mount Point             Total     Used     Free
-/                         59G     6.1G      52G
-/tmp                     7.8G     8.0K     7.8G
-/media/ssdmount          938G     314G     577G
-/media/wdmount           1.8T     369G     1.4T
-──────────────────────────────────────────────────
-💿 NVMe & USB Storage Info:
-NVMe Devices:
-nvme0n1 - Unknown | Temp: 32°C | Hours: 207
-USB Storage Devices:
-sda - Elements 10B8 | Temp: 34°C | Hours: 16545
-──────────────────────────────────────────────────
-Press 'q' to exit. Use arrows or mouse to scroll.
-```
+![orangepi5-myrktop](https://github.com/user-attachments/assets/b26225af-7d15-4d32-aa1d-248d91d4f9e6)
 
----
+![orangepi5plus-myrktop](https://github.com/user-attachments/assets/b8af73ce-b58c-4090-bccc-518e6144f6c8)
+
 
 ## **🔧 How to Contribute**
 If you find a bug or want to improve **myrktop**, feel free to fork the repository and submit a pull request.
