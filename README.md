@@ -1,4 +1,4 @@
-# 🖥️ myrktop - Orange Pi 5/5 Plus (RK3588) System Monitor COLORED BRANCH
+# 🖥️ myrktop - Orange Pi 5/5 Plus (RK3588) System Monitor COLORED
 
 🔥 **myrktop** is a lightweight system monitor for **Orange Pi 5/5 Plus (RK3588)**, providing real-time information about **CPU, GPU, NPU, RAM, RGA, and system temperatures**.
 
@@ -49,7 +49,7 @@ sudo python myrktop/myrktop.py
 
 
 ## **🔧 How to Contribute**
-If you find a bug or want to improve **myrktop**, feel free to fork the repository and submit a pull request.
+This code is forked form other author. If you find a bug or want to improve **myrktop**, feel free to fork the original repository and submit a pull request.
 
 📂 **GitHub Repository:** [https://github.com/mhl221135/myrktop](https://github.com/mhl221135/myrktop)
 
