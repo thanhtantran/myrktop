@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# Run monitoring script in the background
-python3 ~/myrktop.py
